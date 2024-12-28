@@ -1,0 +1,24 @@
+{
+  "name": "react-bundle",
+  "version": "1.0.0",
+  "main": "src/index.js",
+  "scripts": {
+    "start": "webpack serve --mode development",
+    "build": "webpack --mode production"
+  },
+  "author": "elloramir",
+  "license": "MIT",
+  "description": "",
+  "dependencies": {
+    "acorn": "^8.14.0",
+    "acorn-jsx": "^5.3.2",
+    "astring": "^1.9.0",
+    "react": "^19.0.0",
+    "react-dom": "^19.0.0",
+  },
+  "devDependencies": {
+    "webpack": "^5.91.0",
+    "webpack-cli": "^5.1.4",
+    "webpack-dev-server": "^5.0.4"
+  }
+}
