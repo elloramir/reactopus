@@ -5,6 +5,15 @@ const parser = acorn.Parser.extend(jsx());
 
 const jsxGenerator = Object.assign({}, astring.GENERATOR, {
     ExportDefaultDeclaration(node, state) {
+        if (node.declaration.type === 'FunctionDeclaration' || node.declaration.type === 'ClassDeclaration') {
+            const name = node.declaration.id.name;
+            this[node.declaration.type](node.declaration, state);
+            state.write(`;__export.default = ${name};\n`);
+        } else {
+            state.write(';__export.default = ');
+            this[node.declaration.type](node.declaration, state);
+            state.write(';\n');
+        }
     },
 
     ExportNamedDeclaration(node, state) {

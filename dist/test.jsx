@@ -1,8 +1,5 @@
-import Lol from "./teasd";
-
-console.log(Lol)
-
-const App = () => {
+export default
+function App() {
     // State para o contador
     const [count, setCount] = React.useState(0);
     // Referência para o texto da div

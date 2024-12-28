@@ -24,9 +24,13 @@ window.addEventListener("load", async () => {
 
 function createJSXPackage(code) {
 	const transpiled = transpiler.parse(code);
-	const finalModule = new AnonFunction("___require", transpiled);
+	const finalModule = new AnonFunction("___require", "__export", transpiled);
+	const exportObject = { };
 
-	return finalModule(importModule);
+	// Execute module
+	finalModule(importModule, exportObject);
+
+	return exportObject;
 }
 
 
@@ -52,5 +56,5 @@ async function importModule(filename) {
 			return null;
 	}
 
-	return loaded;
+	return loaded.default;
 }
