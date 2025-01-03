@@ -5,7 +5,7 @@ const AnonFunction = (async () => {}).constructor;
 // Define react toolkit as global
 window.React = require("react");
 window.ReactDOM = require("react-dom/client");
-
+Window.ReactRouter = require("react-router");
 
 window.addEventListener("load", async () => {
 	const scripts = document.querySelectorAll("script");
@@ -14,10 +14,14 @@ window.addEventListener("load", async () => {
 	// Transpile script tags that imports jsx
 	for (const script of jsxMime) {
 		const src = script.getAttribute("src");
-		if (!src) continue;
+		if (!src) {
+			const code = script.textContent.trim();
 
-		// Let's load and transpile the code
-		importModule(src);
+			if (code.length > 0) {
+				createJSXPackage(code);
+			}
+		}
+		else importModule(src); // Let's load and transpile the code
 	}
 });
 
@@ -40,6 +44,7 @@ async function importModule(filename) {
 		filename += '.js';
     }
 
+
 	const url = new URL(window.location);
 	const absolute = new URL(filename, url).href;
 	let loaded = modulesLoaded.get(absolute)
@@ -49,12 +54,17 @@ async function importModule(filename) {
 			.then(res => res.status == 404 ? null : res.text());
 
 		if (code) {
-			loaded = createJSXPackage(code);
-			modulesLoaded.set(absolute, loaded);
+			try {
+				loaded = createJSXPackage(code, absolute);
+				modulesLoaded.set(absolute, loaded);
+			}
+			catch(err) {
+				throw `Can't parse package: ${absolute}\n${err}`;
+			}
 		}
 		else
-			return null;
+			throw `Can't find package file: ${absolute}`;
 	}
 
-	return loaded.default;
+	return loaded;
 }

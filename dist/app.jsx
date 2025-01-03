@@ -1,3 +1,7 @@
+export function helperTest() {
+    return "hello sailor";
+}
+
 export default
 function App() {
     // State para o contador
@@ -21,6 +25,3 @@ function App() {
         </div>
     );
 };
-
-// Corrigido: usando a sintaxe JSX para renderizar o componente
-ReactDOM.createRoot(document.getElementById('root')).render(<App />);

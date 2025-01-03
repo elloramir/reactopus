@@ -9,6 +9,11 @@
 <span id="root"></span>
 
 <script type="text/javascript" src="./bundle.js"></script>
-<script type="text/jsx" src="./test.jsx"></script>
+<script type="text/jsx">
+	import App, { helperTest } from "./app.jsx"
+
+	// Corrigido: usando a sintaxe JSX para renderizar o componente
+	ReactDOM.createRoot(document.getElementById('root')).render(<App />);
+</script>
 </body>
 </html>
