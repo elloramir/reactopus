@@ -5,7 +5,7 @@ const AnonFunction = (async () => {}).constructor;
 // Define react toolkit as global
 window.React = require("react");
 window.ReactDOM = require("react-dom/client");
-Window.ReactRouter = require("react-router");
+window.ReactRouter = require("react-router");
 
 window.addEventListener("load", async () => {
 	const scripts = document.querySelectorAll("script");

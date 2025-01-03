@@ -11,3 +11,18 @@ My solution is to streamline React’s usage, offering a setup that feels simple
 - Eliminate Babel: We need to transpile code ourselves, as Babel is bloated and unnecessarily large for this purpose.
 - Add module syntax support: This is essential for organizing and modularizing JSX applications effectively.
 - Extract JSX from script tags: We need a mechanism to handle inline JSX or external sources specified with src attributes.
+
+```html
+<script type="text/javascript" src="reactopus.js"></script>
+<script type="text/jsx">
+	const App = () => (
+		<h1>Hello World</h1>
+	);
+
+	// Corrigido: usando a sintaxe JSX para renderizar o componente
+	ReactDOM.createRoot(document.getElementById('root')).render(<App />);
+</script>
+
+<!-- You can also use src -->
+<script type="text/jsx" src="app.jsx"></script>
+```
