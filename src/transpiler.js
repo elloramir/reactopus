@@ -1,3 +1,7 @@
+// Copyright 2025 Elloramir. All rights reserved.
+// Use of this source code is governed by a MIT
+// license that can be found in the LICENSE file.
+
 const acorn = require("acorn");
 const jsx = require("acorn-jsx");
 const astring = require("astring");
@@ -150,6 +154,33 @@ const jsxGenerator = Object.assign({}, astring.GENERATOR, {
         if (text) {
             state.write(JSON.stringify(text)); // Convert to JSON string to escape special characters
         }
+    },
+
+    JSXMemberExpression(node, state) {
+        this[node.object.type](node.object, state);
+        state.write('.');
+        this[node.property.type](node.property, state);
+    },
+
+    JSXFragment(node, state) {
+        state.write('React.createElement(React.Fragment, null');
+        
+        const validChildren = node.children.filter(child => {
+            if (child.type === 'JSXText') {
+                return child.value.trim().length > 0;
+            }
+            return true;
+        });
+
+        if (validChildren.length > 0) {
+            state.write(', ');
+            validChildren.forEach((child, index) => {
+                if (index > 0) state.write(', ');
+                this[child.type](child, state);
+            });
+        }
+
+        state.write(')');
     },
 
     JSXExpressionContainer(node, state) {

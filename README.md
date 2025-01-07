@@ -22,3 +22,8 @@ I’ve created a simple environment to use React with just one library, addressi
 <!-- You can also use src -->
 <script type="text/jsx" src="app.jsx"></script>
 ```
+
+### Work in progress
+- [ ] Exactly reproduce the behavior of imports in ES6, which includes: "name not exported", and no "deafult export", etc...
+- [ ] AST unused node types
+- [ ] Reduce bundle size
