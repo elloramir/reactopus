@@ -183,6 +183,10 @@ const jsxGenerator = Object.assign({}, astring.GENERATOR, {
         state.write(')');
     },
 
+    JSXEmptyExpression(node, state) {
+        // Just skip comments
+    },
+
     JSXExpressionContainer(node, state) {
         // Handles expressions within JSX, e.g., `{expression}`
         this[node.expression.type](node.expression, state);
@@ -201,6 +205,7 @@ const jsxGenerator = Object.assign({}, astring.GENERATOR, {
         }
     },
 
+
     JSXSpreadAttribute(node, state) {
         // Handles spread attributes, e.g., `{...props}`
         state.write('...');
@@ -208,14 +213,13 @@ const jsxGenerator = Object.assign({}, astring.GENERATOR, {
     }
 });
 
-// Function to parse and transform code
 module.exports.parse = function (code) {
     const ast = parser.parse(code, {
-        ecmaVersion: 2020, // Specify ECMAScript version
-        sourceType: "module", // Indicate that the code is in module format
+        ecmaVersion: 2020,
+        sourceType: "module",
     });
     const parsed = astring.generate(ast, {
-        generator: jsxGenerator, // Use the custom JSX generator
+        generator: jsxGenerator,
     });
-    return parsed; // Return the transformed code
+    return parsed;
 };

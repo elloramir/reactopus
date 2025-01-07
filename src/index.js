@@ -21,7 +21,7 @@ window.addEventListener("load", async () => {
             const code = script.textContent.trim();
 
             if (code.length > 0) {
-                createJSXPackage(code, ".");
+                await createJSXPackage(code, ".");
             }
         }
         else importModule(src); // Let's load and transpile the code
@@ -29,14 +29,14 @@ window.addEventListener("load", async () => {
 });
 
 
-function createJSXPackage(code, basePath) {
+async function createJSXPackage(code, basePath) {
     const transpiled = transpiler.parse(code);
     const importProxy = (filename) => importModule(basePath + "/" + filename);
     const finalModule = new AnonFunction("___require", "__export", transpiled);
     const exportObject = { };
 
     // Execute module
-    finalModule(importProxy, exportObject);
+    await finalModule(importProxy, exportObject);
 
     return exportObject;
 }
@@ -51,7 +51,7 @@ async function importModule(filename) {
     const url = new URL(window.location);
     const absolute = new URL(filename, url).href;
     const base = absolute.split("/").slice(0, -1).join("/");
-    const [ mime ] = filename.match(/\.[0-9a-z]+$/i)
+    const [ mime ] = absolute.match(/\.[0-9a-z]+$/i)
     let loaded = modulesLoaded.get(absolute)
 
     if (!loaded) {
@@ -65,7 +65,7 @@ async function importModule(filename) {
                     modulesLoaded.set(absolute, loaded);
                 }
                 else {
-                    loaded = createJSXPackage(code, base);
+                    loaded = await createJSXPackage(code, base);
                     modulesLoaded.set(absolute, loaded);
                 }
             }
