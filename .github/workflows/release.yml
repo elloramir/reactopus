@@ -33,5 +33,7 @@ jobs:
         uses: ncipollo/release-action@v1
         with:
           artifacts: "reactopus.min.js,reactopus-source.zip"
-          tag: Latest version
+          tag: latest
           allowUpdates: true
+          replacesArtifacts: true
+          removeArtifacts: true
