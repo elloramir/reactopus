@@ -11,7 +11,6 @@ The project includes:
 - A JSX parser that converts JSX syntax into an abstract syntax tree (AST)
 - A transpiler that converts AST nodes into Preact-compatible JavaScript
 - A module loader that handles imports, requires, and lazy execution
-- A dev server with hot reload for fast development
 
 
 ## How It Works
