@@ -1,7 +1,3 @@
-// Copyright 2025 Elloramir. All rights reserved.
-// Use of this source code is governed by a MIT
-// license that can be found in the LICENSE file.
-
 const fs = require('fs');
 const path = require('path');
 
@@ -20,17 +16,19 @@ class Cleanup {
 }
 
 module.exports = {
-    entry: './src/index.js',
-    output: {
-        path: path.resolve(__dirname, 'dist'),
-        filename: 'reactopus.js',
-    },
+    mode: 'development',
+    entry: './scripts/index.js',
     devServer: {
-        static: {
-            directory: path.join(__dirname, 'dist'),
-        },
-        compress: true,
-        port: 3000
+        static: './',
+        hot: true,
+        port: 8080
     },
-    plugins: [new Cleanup()]
+    output: {
+        filename: 'bundle.js',
+        path: path.resolve(__dirname, '.'),
+    },
+    mode: 'development',
+    plugins: [
+        new Cleanup()
+    ]
 };
