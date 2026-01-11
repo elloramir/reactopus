@@ -30,8 +30,8 @@ jobs:
         run: zip -r reactopus-source.zip . -x "node_modules/*" ".git/*" ".github/*" "*.js"
 
       - name: Create Release
-        uses: softprops/action-gh-release@v1
+        uses: ncipollo/release-action@v1
         with:
-          files: |
-            reactopus.min.js
-            reactopus-source.zip
+          artifacts: "reactopus.min.js,reactopus-source.zip"
+          tag: v${{ github.run_number }}
+          allowUpdates: true
