@@ -26,13 +26,10 @@ jobs:
       - name: Build
         run: npm run build
 
-      - name: Create source archive
-        run: zip -r reactopus-source.zip . -x "node_modules/*" ".git/*" ".github/*" "*.js"
-
       - name: Create Release
         uses: ncipollo/release-action@v1
         with:
-          artifacts: "reactopus.min.js,reactopus-source.zip"
+          artifacts: "reactopus.min.js"
           tag: latest
           allowUpdates: true
           replacesArtifacts: true
