@@ -24,7 +24,7 @@ module.exports = {
         port: 8080
     },
     output: {
-        filename: process.env.NODE_ENV === 'production' ? 'reactopus.min.js' : 'reactopus.js',
+        filename: 'reactopus.js',
         path: path.resolve(__dirname, '.'),
     },
     plugins: [

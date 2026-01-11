@@ -24,13 +24,13 @@ jobs:
         run: npm run build
 
       - name: Create source archive
-        run: zip -r reactopus-source.zip . -x "node_modules/*" ".git/*" ".github/*" "*.min.js"
+        run: zip -r reactopus-source.zip . -x "node_modules/*" ".git/*" ".github/*" "*.js"
 
       - name: Create Release
         uses: softprops/action-gh-release@v1
         with:
           files: |
-            reactopus.min.js
+            reactopus.js
             reactopus-source.zip
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
