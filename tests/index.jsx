@@ -151,9 +151,4 @@ const AppTestRunner = () => {
     );
 };
 
-const root = document.getElementById("root");
-if (root) {
-    ReactDOM.render(<AppTestRunner />, root);
-} else {
-    document.body.innerHTML += "<p style='color:red'>Fatal: Root span not found</p>";
-}
+ReactDOM.render(<AppTestRunner />, document.getElementById("root"));

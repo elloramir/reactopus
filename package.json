@@ -5,7 +5,8 @@
   "main": "scripts/index.js",
   "scripts": {
     "start": "webpack serve",
-    "build": "webpack"
+    "build": "webpack --mode production",
+    "build:dev": "webpack --mode development"
   },
   "dependencies": {
     "preact": "^10.19.3"

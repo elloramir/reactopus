@@ -24,10 +24,9 @@ module.exports = {
         port: 8080
     },
     output: {
-        filename: 'bundle.js',
+        filename: process.env.NODE_ENV === 'production' ? 'reactopus.min.js' : 'reactopus.js',
         path: path.resolve(__dirname, '.'),
     },
-    mode: 'development',
     plugins: [
         new Cleanup()
     ]
