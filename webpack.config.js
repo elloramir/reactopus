@@ -15,19 +15,23 @@ class Cleanup {
     }
 }
 
-module.exports = {
-    mode: 'development',
-    entry: './scripts/index.js',
-    devServer: {
-        static: './',
-        hot: true,
-        port: 8080
-    },
-    output: {
-        filename: 'reactopus.js',
-        path: path.resolve(__dirname, '.'),
-    },
-    plugins: [
-        new Cleanup()
-    ]
+module.exports = (env, argv) => {
+    const isProduction = argv.mode === 'production';
+    
+    return {
+        mode: argv.mode || 'development',
+        entry: './scripts/index.js',
+        devServer: {
+            static: './',
+            hot: true,
+            port: 8080
+        },
+        output: {
+            filename: isProduction ? 'reactopus.min.js' : 'reactopus.js',
+            path: path.resolve(__dirname, '.'),
+        },
+        plugins: [
+            new Cleanup()
+        ]
+    };
 };

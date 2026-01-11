@@ -5,6 +5,9 @@ on:
     tags:
       - 'v*'
 
+permissions:
+  contents: write
+
 jobs:
   build:
     runs-on: ubuntu-latest
@@ -30,7 +33,5 @@ jobs:
         uses: softprops/action-gh-release@v1
         with:
           files: |
-            reactopus.js
+            reactopus.min.js
             reactopus-source.zip
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
