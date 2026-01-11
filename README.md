@@ -1,14 +1,18 @@
 ## What is Reactopus?
 
-Designed for simple small web applications, Reactopus is the fastest way to build React applications with JSX syntax at runtime. On top of Preact, Reactopus parses JSX, transpiles it to JavaScript, and executes it in the browser with a custom module loader.
+Designed for small web applications, Reactopus is the fastest way to build React applications with JSX syntax at runtime. On top of Preact, Reactopus parses JSX, transpiles it to JavaScript, and executes it in the browser with a custom module loader.
 
-Reactopus is a lightweight runtime that allows you to write React-style code without the full React library. Instead, it uses Preact (a 3KB alternative to React) and provides a custom module system that handles imports and lazy-loading of dependencies at runtime.
+```html
+<script src="reactopus.min.js"></script>
+<script type="text/jsx" src="my-react-app.jsx"></script>
+```
 
 The project includes:
 - A JSX parser that converts JSX syntax into an abstract syntax tree (AST)
 - A transpiler that converts AST nodes into Preact-compatible JavaScript
 - A module loader that handles imports, requires, and lazy execution
 - A dev server with hot reload for fast development
+
 
 ## How It Works
 
