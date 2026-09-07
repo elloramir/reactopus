@@ -47,7 +47,7 @@ export async function boot(config) {
                 scanImportSources(compiled.imports, ownDocumentUrl);
                 entryPoints.push({ type: "inline", compiled });
             } catch (e) {
-                console.error("[Reactopus] Failed to parse inline <script type=\"text/jsx\">:", e);
+                console.error('[Reactopus] Failed to parse inline <script type="text/jsx">:', e);
             }
         }
     }

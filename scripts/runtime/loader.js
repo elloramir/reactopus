@@ -23,7 +23,10 @@ export function resetLoader() {
     resetCompilerOverrides();
 }
 
-/** @param {string[]} imports @param {string} baseUrl */
+/**
+ * @param {string[]} imports
+ * @param {string} baseUrl
+ */
 export function scanImportSources(imports, baseUrl) {
     for (const source of imports) {
         if (!source.startsWith(".")) continue;
@@ -35,7 +38,10 @@ export function scanImportSources(imports, baseUrl) {
     }
 }
 
-/** @param {string} url @param {{useCache?: boolean}} [options] */
+/**
+ * @param {string} url
+ * @param {{useCache?: boolean}} [options]
+ */
 export function enqueue(url, options) {
     if (options && options.useCache !== undefined) setCacheOverride(url, options.useCache);
     if (!visited.has(url) && !hasCompiledFile(url) && !isRegistered(url)) {

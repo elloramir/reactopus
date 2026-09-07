@@ -8,7 +8,10 @@
 
 /** @typedef {{type: "text", value: string}} TextNode */
 
-/** A JSX `{...}` expression body - its own children can include nested elements. @typedef {{type: "expression", children: AstNode[]}} ContentExpressionNode */
+/**
+ * A JSX `{...}` expression body - its own children can include nested elements.
+ * @typedef {{type: "expression", children: AstNode[]}} ContentExpressionNode
+ */
 
 /** @typedef {{type: "element", tagName: string|null, attributes: ElementAttribute[], children: AstNode[]}} ElementNode */
 
@@ -18,10 +21,16 @@
 
 /** @typedef {StringAttributeValue|ExprAttributeValue|BooleanAttributeValue} AttributeValue */
 /** @typedef {{type: "string", value: string}} StringAttributeValue */
-/** A JSX `name={...}` attribute - `value` is the raw expression source, not a nested AST. @typedef {{type: "expression", value: string}} ExprAttributeValue */
+/**
+ * A JSX `name={...}` attribute - `value` is the raw expression source, not a nested AST.
+ * @typedef {{type: "expression", value: string}} ExprAttributeValue
+ */
 /** @typedef {{type: "boolean", value: true}} BooleanAttributeValue */
 
-/** `specifierText` is the raw "React, { useState }" source between `import` and `from`, unparsed - the transpiler pattern-matches it directly. @typedef {{type: "import", specifierText: string|null, source: string}} ImportNode */
+/**
+ * `specifierText` is the raw "React, { useState }" source between `import` and `from`, unparsed - the transpiler pattern-matches it directly.
+ * @typedef {{type: "import", specifierText: string|null, source: string}} ImportNode
+ */
 
 /** @typedef {{type: "export-default"}} ExportDefaultNode */
 /** @typedef {{type: "export-function", name: string, generator: boolean}} ExportFunctionNode */

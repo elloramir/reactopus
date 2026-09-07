@@ -1,4 +1,11 @@
-import { getBuiltin, isRegistered, getRegisteredExports, registerModule, hasCompiledFile, getCompiledFile } from "./module-registry.js";
+import {
+    getBuiltin,
+    isRegistered,
+    getRegisteredExports,
+    registerModule,
+    hasCompiledFile,
+    getCompiledFile,
+} from "./module-registry.js";
 
 /** @type {string|null} */
 let ownDocumentUrl = null;
@@ -8,7 +15,11 @@ export function configureSandbox(config) {
     ownDocumentUrl = config.ownDocumentUrl;
 }
 
-/** @param {string} path @param {string} baseUrl @returns {Object} */
+/**
+ * @param {string} path
+ * @param {string} baseUrl
+ * @returns {Object}
+ */
 function customRequire(path, baseUrl) {
     const builtin = getBuiltin(path);
     if (builtin !== undefined) return builtin;
@@ -22,7 +33,11 @@ function customRequire(path, baseUrl) {
     throw new Error(`[Reactopus] Module not loaded: ${path}`);
 }
 
-/** @param {import("./types.js").CompiledModule} compiled @param {string} url @returns {Object} */
+/**
+ * @param {import("./types.js").CompiledModule} compiled
+ * @param {string} url
+ * @returns {Object}
+ */
 export function executeCompiled(compiled, url) {
     /** @type {import("./types.js").ModuleRecord} */
     const module = { exports: {} };
@@ -50,7 +65,10 @@ export function executeCompiled(compiled, url) {
     return module.exports;
 }
 
-/** @param {string} url @returns {Object} */
+/**
+ * @param {string} url
+ * @returns {Object}
+ */
 export function executeModule(url) {
     if (isRegistered(url)) return getRegisteredExports(url);
 

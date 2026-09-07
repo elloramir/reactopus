@@ -18,7 +18,10 @@ export function configureCompiler(config) {
     debug = config.debug;
 }
 
-/** @param {string} url @param {boolean|undefined} value */
+/**
+ * @param {string} url
+ * @param {boolean|undefined} value
+ */
 export function setCacheOverride(url, value) {
     if (value !== undefined) cacheOverrides.set(url, value);
 }
@@ -30,7 +33,10 @@ export function resetCompilerOverrides() {
     cacheOverrides.clear();
 }
 
-/** @param {string} url @returns {boolean} */
+/**
+ * @param {string} url
+ * @returns {boolean}
+ */
 function resolveUseCache(url) {
     const override = cacheOverrides.get(url);
     return override === undefined ? useCache : override;

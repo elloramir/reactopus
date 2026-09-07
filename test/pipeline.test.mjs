@@ -25,7 +25,10 @@ describe("imports", () => {
     });
 
     it("default import", () => {
-        assert.match(compile(`import React from "react";`), /const React = require\("react"\)\.default \|\| require\("react"\);/);
+        assert.match(
+            compile(`import React from "react";`),
+            /const React = require\("react"\)\.default \|\| require\("react"\);/,
+        );
     });
 
     it("named imports", () => {
@@ -174,11 +177,17 @@ describe("JSX elements and attributes", () => {
 
     it("nested elements", () => {
         const code = compile(`const x = <div><span>a</span><span>b</span></div>;`);
-        assert.match(code, /React\.createElement\("div", null, React\.createElement\("span", null, "a"\), React\.createElement\("span", null, "b"\)\)/);
+        assert.match(
+            code,
+            /React\.createElement\("div", null, React\.createElement\("span", null, "a"\), React\.createElement\("span", null, "b"\)\)/,
+        );
     });
 
     it("fragment shorthand", () => {
-        assert.match(compile(`const x = <><p>a</p></>;`), /React\.createElement\(React\.Fragment, null, React\.createElement\("p", null, "a"\)\)/);
+        assert.match(
+            compile(`const x = <><p>a</p></>;`),
+            /React\.createElement\(React\.Fragment, null, React\.createElement\("p", null, "a"\)\)/,
+        );
     });
 
     it("string attribute", () => {
@@ -226,7 +235,10 @@ describe("JSX expressions and whitespace", () => {
     });
 
     it("conditional rendering with &&", () => {
-        assert.match(compile(`const x = <div>{show && <span>yes</span>}</div>;`), /show && React\.createElement\("span", null, "yes"\)/);
+        assert.match(
+            compile(`const x = <div>{show && <span>yes</span>}</div>;`),
+            /show && React\.createElement\("span", null, "yes"\)/,
+        );
     });
 
     it("ternary rendering with nested elements", () => {

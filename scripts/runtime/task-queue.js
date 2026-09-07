@@ -13,21 +13,21 @@ export default function TaskQueue(concurrency) {
 }
 
 /** @param {number} concurrency */
-TaskQueue.prototype.setConcurrency = function(concurrency) {
+TaskQueue.prototype.setConcurrency = function (concurrency) {
     this.concurrency = concurrency;
 };
 
 /** @param {string} item */
-TaskQueue.prototype.push = function(item) {
+TaskQueue.prototype.push = function (item) {
     this.items.push(item);
 };
 
-TaskQueue.prototype.clear = function() {
+TaskQueue.prototype.clear = function () {
     this.items.length = 0;
 };
 
 /** @param {(item: string) => Promise<void>} worker */
-TaskQueue.prototype.drain = async function(worker) {
+TaskQueue.prototype.drain = async function (worker) {
     const workerCount = Math.max(1, this.concurrency);
     const runners = Array.from({ length: workerCount }, async () => {
         /** @type {string|undefined} */

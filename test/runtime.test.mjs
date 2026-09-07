@@ -60,7 +60,7 @@ describe("element and text rendering", () => {
                 </div>
             );
             `,
-            "BasicSyntax"
+            "BasicSyntax",
         );
         const container = mount(t, BasicSyntax);
 
@@ -80,7 +80,7 @@ describe("element and text rendering", () => {
                 </>
             );
             `,
-            "FragmentTest"
+            "FragmentTest",
         );
         const container = mount(t, FragmentTest);
 
@@ -101,7 +101,7 @@ describe("element and text rendering", () => {
                 </Menu>
             );
             `,
-            "MenuTest"
+            "MenuTest",
         );
         const container = mount(t, MenuTest);
 
@@ -128,7 +128,7 @@ describe("element and text rendering", () => {
                 </div>
             );
             `,
-            "PropsChildrenTest"
+            "PropsChildrenTest",
         );
         const container = mount(t, PropsChildrenTest);
 
@@ -154,7 +154,7 @@ describe("hooks and state", () => {
                 );
             };
             `,
-            "HooksTest"
+            "HooksTest",
         );
         const container = mount(t, HooksTest);
 
@@ -182,7 +182,7 @@ describe("hooks and state", () => {
                 );
             };
             `,
-            "RefTest"
+            "RefTest",
         );
         const container = mount(t, RefTest);
 
@@ -211,7 +211,7 @@ describe("hooks and state", () => {
                 }
             }
             `,
-            "ClassCounter"
+            "ClassCounter",
         );
         const container = mount(t, ClassCounter);
 
@@ -239,7 +239,7 @@ describe("hooks and state", () => {
                 );
             };
             `,
-            "EffectTest"
+            "EffectTest",
         );
         const container = mount(t, EffectTest);
 
@@ -266,7 +266,7 @@ describe("forms and events", () => {
                 );
             };
             `,
-            "FormTest"
+            "FormTest",
         );
         const container = mount(t, FormTest);
 
@@ -294,7 +294,7 @@ describe("forms and events", () => {
             import React from "react";
             export const DisabledTest = () => <input data-testid="disabled-input" disabled />;
             `,
-            "DisabledTest"
+            "DisabledTest",
         );
         const container = mount(t, DisabledTest);
 
@@ -310,7 +310,7 @@ describe("forms and events", () => {
                 return <div data-testid="spread" {...extra} />;
             };
             `,
-            "SpreadTest"
+            "SpreadTest",
         );
         const container = mount(t, SpreadTest);
         const el = container.querySelector('[data-testid="spread"]');
@@ -338,7 +338,7 @@ describe("lists and reconciliation", () => {
                 );
             };
             `,
-            "ListTest"
+            "ListTest",
         );
         const container = mount(t, ListTest);
 
@@ -366,18 +366,24 @@ describe("lists and reconciliation", () => {
                 );
             };
             `,
-            "ReorderTest"
+            "ReorderTest",
         );
         const container = mount(t, ReorderTest);
 
         const nodesBefore = [...container.querySelectorAll("li")];
-        assert.deepEqual(nodesBefore.map((n) => n.textContent), ["a", "b", "c"]);
+        assert.deepEqual(
+            nodesBefore.map((n) => n.textContent),
+            ["a", "b", "c"],
+        );
 
         fire(container.querySelector("button"), "click");
         await flush();
 
         const nodesAfter = [...container.querySelectorAll("li")];
-        assert.deepEqual(nodesAfter.map((n) => n.textContent), ["c", "b", "a"]);
+        assert.deepEqual(
+            nodesAfter.map((n) => n.textContent),
+            ["c", "b", "a"],
+        );
         // Preact's keyed diffing should move the same 3 DOM nodes rather than
         // destroy+recreate them - same identities, just reordered.
         assert.deepEqual(new Set(nodesAfter), new Set(nodesBefore));
@@ -394,7 +400,7 @@ describe("error handling", () => {
                 return <div data-testid="error">{dangerous.shouldCrash}</div>;
             };
             `,
-            "ErrorTest"
+            "ErrorTest",
         );
         installDom();
         const container = document.createElement("div");
@@ -422,7 +428,7 @@ describe("error handling", () => {
                 }
             }
             `,
-            "Boundary"
+            "Boundary",
         );
         const Bomb = loadComponent(
             `
@@ -431,7 +437,7 @@ describe("error handling", () => {
                 throw new Error("boom");
             };
             `,
-            "Bomb"
+            "Bomb",
         );
         installDom();
         const container = document.createElement("div");

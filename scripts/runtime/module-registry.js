@@ -29,37 +29,58 @@ export function resetModuleRegistry() {
     compiledFiles.clear();
 }
 
-/** @param {string} path @returns {Object|undefined} */
+/**
+ * @param {string} path
+ * @returns {Object|undefined}
+ */
 export function getBuiltin(path) {
     return modules[path] ? modules[path].exports : undefined;
 }
 
-/** @param {string} url @returns {boolean} */
+/**
+ * @param {string} url
+ * @returns {boolean}
+ */
 export function isRegistered(url) {
     return Boolean(modules[url]);
 }
 
-/** @param {string} url @returns {Object|undefined} */
+/**
+ * @param {string} url
+ * @returns {Object|undefined}
+ */
 export function getRegisteredExports(url) {
     return modules[url] ? modules[url].exports : undefined;
 }
 
-/** @param {string} url @param {import("./types.js").ModuleRecord} module */
+/**
+ * @param {string} url
+ * @param {import("./types.js").ModuleRecord} module
+ */
 export function registerModule(url, module) {
     modules[url] = module;
 }
 
-/** @param {string} url @returns {boolean} */
+/**
+ * @param {string} url
+ * @returns {boolean}
+ */
 export function hasCompiledFile(url) {
     return compiledFiles.has(url);
 }
 
-/** @param {string} url @returns {import("./types.js").CompiledModule|undefined} */
+/**
+ * @param {string} url
+ * @returns {import("./types.js").CompiledModule|undefined}
+ */
 export function getCompiledFile(url) {
     return compiledFiles.get(url);
 }
 
-/** @param {string} url @param {import("./types.js").CompiledModule} compiled */
+/**
+ * @param {string} url
+ * @param {import("./types.js").CompiledModule} compiled
+ */
 export function registerCompiledFile(url, compiled) {
     compiledFiles.set(url, compiled);
 }

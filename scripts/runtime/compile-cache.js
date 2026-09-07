@@ -16,12 +16,18 @@ function getStorage() {
     }
 }
 
-/** @param {string} source @returns {string} */
+/**
+ * @param {string} source
+ * @returns {string}
+ */
 function keyFor(source) {
     return `${KEY_PREFIX}${fnv1aHash(source)}`;
 }
 
-/** @param {string} source @returns {import("./types.js").CompiledModule|null} */
+/**
+ * @param {string} source
+ * @returns {import("./types.js").CompiledModule|null}
+ */
 export function readCompiled(source) {
     const storage = getStorage();
     if (!storage) return null;
@@ -33,7 +39,10 @@ export function readCompiled(source) {
     }
 }
 
-/** @param {string} source @param {import("./types.js").CompiledModule} compiled */
+/**
+ * @param {string} source
+ * @param {import("./types.js").CompiledModule} compiled
+ */
 export function writeCompiled(source, compiled) {
     const storage = getStorage();
     if (!storage) return;

@@ -2,7 +2,10 @@
 // lines vanish, a line break between two content lines becomes one space, and
 // spacing on the same line as real content is left untouched. Only for JSX
 // text children - never for raw JS code, which is whitespace/line sensitive.
-/** @param {string} text @returns {string} */
+/**
+ * @param {string} text
+ * @returns {string}
+ */
 export function normalizeJSXText(text) {
     const lines = text.split(/\r\n|\n|\r/);
 

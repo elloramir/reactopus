@@ -1,7 +1,10 @@
 // import ... from "..."  ->  require("...")
 // Runs in a CommonJS sandbox (see runtime/sandbox.js), so every import
 // becomes a plain `require` + destructure/assign.
-/** @param {import("../parser/ast-types.js").ImportNode} node @returns {string} */
+/**
+ * @param {import("../parser/ast-types.js").ImportNode} node
+ * @returns {string}
+ */
 export function generateRequire(node) {
     if (!node.specifierText) {
         return `require("${node.source}");\n`; // side-effect import: import "pkg";
@@ -52,7 +55,10 @@ export function generateRequire(node) {
 // Pulls every import source (relative or package) out of an already-parsed
 // AST, without the caller needing to know the "import" node's shape - used
 // by runtime/compile.js to find a file's dependencies.
-/** @param {import("../parser/ast-types.js").AstNode[]} ast @returns {string[]} */
+/**
+ * @param {import("../parser/ast-types.js").AstNode[]} ast
+ * @returns {string[]}
+ */
 export function extractImportSources(ast) {
     return ast.filter((node) => node.type === "import").map((node) => node.source);
 }

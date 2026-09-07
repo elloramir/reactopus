@@ -1,7 +1,10 @@
 import { convertNode } from "./index.js";
 
 // <div a="1" {...rest} b={2}>child</div>  ->  React.createElement("div", {...}, "child")
-/** @param {import("../parser/ast-types.js").ElementAttribute[]} attributes @returns {string} */
+/**
+ * @param {import("../parser/ast-types.js").ElementAttribute[]} attributes
+ * @returns {string}
+ */
 function buildProps(attributes) {
     if (!attributes || attributes.length === 0) return "null";
 
@@ -20,7 +23,10 @@ function buildProps(attributes) {
     return `{ ${parts.join(", ")} }`;
 }
 
-/** @param {import("../parser/ast-types.js").ElementNode} node @returns {string} */
+/**
+ * @param {import("../parser/ast-types.js").ElementNode} node
+ * @returns {string}
+ */
 export function generateReactCreateElement(node) {
     let tagName = "React.Fragment";
     if (node.tagName) {

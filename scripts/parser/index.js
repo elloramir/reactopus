@@ -17,23 +17,29 @@ export default function Parser(input) {
 
 // Navigation & basic consumption
 
-Parser.prototype.eof = function() {
+Parser.prototype.eof = function () {
     return this.pos >= this.input.length;
 };
 
-Parser.prototype.nextChar = function() {
+Parser.prototype.nextChar = function () {
     return this.input[this.pos];
 };
 
-/** @param {string} str @returns {boolean} */
-Parser.prototype.startsWith = function(str) {
+/**
+ * @param {string} str
+ * @returns {boolean}
+ */
+Parser.prototype.startsWith = function (str) {
     return this.input.startsWith(str, this.pos);
 };
 
 // Keyword check with word-boundary guards on both sides, so "export" doesn't
 // match inside "foo.export" or "myexport".
-/** @param {string} word @returns {boolean} */
-Parser.prototype.matchesKeyword = function(word) {
+/**
+ * @param {string} word
+ * @returns {boolean}
+ */
+Parser.prototype.matchesKeyword = function (word) {
     if (!this.startsWith(word)) return false;
     const before = this.input[this.pos - 1];
     const after = this.input[this.pos + word.length];
@@ -42,8 +48,11 @@ Parser.prototype.matchesKeyword = function(word) {
     return true;
 };
 
-/** @param {string} message @returns {never} */
-Parser.prototype.error = function(message) {
+/**
+ * @param {string} message
+ * @returns {never}
+ */
+Parser.prototype.error = function (message) {
     let line = 1;
     let col = 1;
     for (let i = 0; i < this.pos && i < this.input.length; i++) {
@@ -58,7 +67,7 @@ Parser.prototype.error = function(message) {
 };
 
 /** @param {string} str */
-Parser.prototype.expect = function(str) {
+Parser.prototype.expect = function (str) {
     if (this.startsWith(str)) {
         this.pos += str.length;
     } else {
@@ -66,12 +75,15 @@ Parser.prototype.expect = function(str) {
     }
 };
 
-Parser.prototype.consumeChar = function() {
+Parser.prototype.consumeChar = function () {
     return this.input[this.pos++];
 };
 
-/** @param {(ch: string) => boolean} predicate @returns {string} */
-Parser.prototype.consumeWhile = function(predicate) {
+/**
+ * @param {(ch: string) => boolean} predicate
+ * @returns {string}
+ */
+Parser.prototype.consumeWhile = function (predicate) {
     let res = "";
     while (!this.eof() && predicate(this.nextChar())) {
         res += this.consumeChar();
@@ -79,18 +91,21 @@ Parser.prototype.consumeWhile = function(predicate) {
     return res;
 };
 
-Parser.prototype.consumeWhiteSpace = function() {
+Parser.prototype.consumeWhiteSpace = function () {
     this.consumeWhile(isWhitespace);
 };
 
 // Tokenizers: names, strings, comments, regex literals, balanced blocks
 
-Parser.prototype.parseName = function() {
+Parser.prototype.parseName = function () {
     return this.consumeWhile(isNameChar);
 };
 
-/** @param {string} quoteChar @returns {string} */
-Parser.prototype.consumeStringLiteral = function(quoteChar) {
+/**
+ * @param {string} quoteChar
+ * @returns {string}
+ */
+Parser.prototype.consumeStringLiteral = function (quoteChar) {
     if (this.nextChar() !== quoteChar) {
         this.error(`Expected string start "${quoteChar}"`);
     }
@@ -124,14 +139,14 @@ Parser.prototype.consumeStringLiteral = function(quoteChar) {
 };
 
 /** @returns {string} */
-Parser.prototype.consumeLineComment = function() {
+Parser.prototype.consumeLineComment = function () {
     let value = this.consumeChar() + this.consumeChar(); // "//"
-    value += this.consumeWhile(ch => ch !== "\n");
+    value += this.consumeWhile((ch) => ch !== "\n");
     return value;
 };
 
 /** @returns {string} */
-Parser.prototype.consumeBlockComment = function() {
+Parser.prototype.consumeBlockComment = function () {
     let value = this.consumeChar() + this.consumeChar(); // "/*"
     while (!this.eof() && !this.startsWith("*/")) {
         value += this.consumeChar();
@@ -144,7 +159,7 @@ Parser.prototype.consumeBlockComment = function() {
 
 // Returns the consumed regex literal, or null if this "/" isn't one (pos is left untouched on null).
 /** @returns {string|null} */
-Parser.prototype.tryConsumeRegexLiteral = function() {
+Parser.prototype.tryConsumeRegexLiteral = function () {
     if (this.nextChar() !== "/") return null;
     if (this.input[this.pos + 1] === "/" || this.input[this.pos + 1] === "*") return null;
     if (!precedingContextAllowsExpression(this.input, this.pos)) return null;
@@ -170,7 +185,7 @@ Parser.prototype.tryConsumeRegexLiteral = function() {
         else if (ch === "]") inClass = false;
         else if (ch === "/" && !inClass) {
             value += this.consumeChar();
-            value += this.consumeWhile(c => /[a-zA-Z]/.test(c)); // flags
+            value += this.consumeWhile((c) => /[a-zA-Z]/.test(c)); // flags
             return value;
         }
 
@@ -182,8 +197,12 @@ Parser.prototype.tryConsumeRegexLiteral = function() {
 };
 
 // Skips string/comment/regex content atomically so their braces never disturb depth counting.
-/** @param {string} openChar @param {string} closeChar @returns {string} */
-Parser.prototype.consumeBalancedBlock = function(openChar, closeChar) {
+/**
+ * @param {string} openChar
+ * @param {string} closeChar
+ * @returns {string}
+ */
+Parser.prototype.consumeBalancedBlock = function (openChar, closeChar) {
     if (this.nextChar() !== openChar) this.error(`Expected "${openChar}"`);
 
     let depth = 0;
@@ -225,7 +244,7 @@ Parser.prototype.consumeBalancedBlock = function(openChar, closeChar) {
 
 // Consumes up to the matching "}" (the opening "{" must already be consumed).
 /** @returns {string} */
-Parser.prototype.consumeBraceBody = function() {
+Parser.prototype.consumeBraceBody = function () {
     let depth = 1;
     let value = "";
 
@@ -280,8 +299,12 @@ Parser.prototype.consumeBraceBody = function() {
 // stopChars: if set, stop at the first of these chars seen at bracket-depth 0
 // (used to find the end of one `export const NAME = <initializer>` declarator
 // without being fooled by commas/semicolons nested inside it).
-/** @param {boolean} isJSXMode @param {string[]|null} stopChars @returns {import("./ast-types.js").AstNode[]} */
-Parser.prototype.scanMixedContent = function(isJSXMode, stopChars) {
+/**
+ * @param {boolean} isJSXMode
+ * @param {string[]|null} stopChars
+ * @returns {import("./ast-types.js").AstNode[]}
+ */
+Parser.prototype.scanMixedContent = function (isJSXMode, stopChars) {
     /** @type {import("./ast-types.js").AstNode[]} */
     const nodes = [];
     let buffer = "";
@@ -359,14 +382,14 @@ Parser.prototype.scanMixedContent = function(isJSXMode, stopChars) {
 };
 
 /** @returns {import("./ast-types.js").AstNode[]} */
-Parser.prototype.parse = function() {
+Parser.prototype.parse = function () {
     const imports = this.parseAllImports();
     const nodes = this.scanMixedContent(false, null);
     return [...imports, ...nodes];
 };
 
 /** @returns {import("./ast-types.js").ContentExpressionNode} */
-Parser.prototype.parseExpression = function() {
+Parser.prototype.parseExpression = function () {
     this.expect("{");
     const children = this.scanMixedContent(false, ["}"]);
     this.expect("}");
@@ -376,7 +399,7 @@ Parser.prototype.parseExpression = function() {
 // import ... from "...";
 
 /** @returns {import("./ast-types.js").ImportNode[]} */
-Parser.prototype.parseAllImports = function() {
+Parser.prototype.parseAllImports = function () {
     /** @type {import("./ast-types.js").ImportNode[]} */
     const imports = [];
     this.consumeWhiteSpace();
@@ -388,7 +411,7 @@ Parser.prototype.parseAllImports = function() {
 };
 
 /** @returns {import("./ast-types.js").ImportNode} */
-Parser.prototype.parseImport = function() {
+Parser.prototype.parseImport = function () {
     this.expect("import");
     this.consumeWhiteSpace();
 
@@ -396,7 +419,7 @@ Parser.prototype.parseImport = function() {
     const next = this.nextChar();
     if (isQuoteChar(next)) {
         const ch = this.consumeChar();
-        const source = this.consumeWhile(c => c !== ch);
+        const source = this.consumeWhile((c) => c !== ch);
         this.expect(ch);
         if (this.startsWith(";")) this.consumeChar();
         return { type: "import", specifierText: null, source };
@@ -415,7 +438,7 @@ Parser.prototype.parseImport = function() {
     this.consumeWhiteSpace();
 
     const quote = this.consumeChar();
-    const source = this.consumeWhile(c => c !== quote);
+    const source = this.consumeWhile((c) => c !== quote);
     this.expect(quote);
 
     if (this.startsWith(";")) this.consumeChar();
@@ -431,7 +454,7 @@ Parser.prototype.parseImport = function() {
 // literal that happens to contain the words "export default" is untouched.
 
 /** @returns {import("./ast-types.js").AstNode} */
-Parser.prototype.parseExportStatement = function() {
+Parser.prototype.parseExportStatement = function () {
     this.expect("export");
     this.consumeWhiteSpace();
 
@@ -483,8 +506,11 @@ Parser.prototype.parseExportStatement = function() {
 // with scanMixedContent (not grabbed as a plain string) so JSX inside it -
 // e.g. `export const Foo = () => <div>...</div>` - still parses into real
 // element nodes instead of being swallowed as opaque text.
-/** @param {"const"|"let"|"var"} keyword @returns {import("./ast-types.js").ExportDeclaratorsNode} */
-Parser.prototype.parseExportDeclarators = function(keyword) {
+/**
+ * @param {"const"|"let"|"var"} keyword
+ * @returns {import("./ast-types.js").ExportDeclaratorsNode}
+ */
+Parser.prototype.parseExportDeclarators = function (keyword) {
     /** @type {import("./ast-types.js").Declarator[]} */
     const declarators = [];
 
@@ -534,7 +560,7 @@ Parser.prototype.parseExportDeclarators = function(keyword) {
 };
 
 /** @returns {import("./ast-types.js").ExportNamedNode} */
-Parser.prototype.parseNamedExportList = function() {
+Parser.prototype.parseNamedExportList = function () {
     this.expect("{");
     /** @type {import("./ast-types.js").ExportSpecifier[]} */
     const specifiers = [];
@@ -571,7 +597,7 @@ Parser.prototype.parseNamedExportList = function() {
         this.expect("from");
         this.consumeWhiteSpace();
         const quote = this.consumeChar();
-        source = this.consumeWhile(c => c !== quote);
+        source = this.consumeWhile((c) => c !== quote);
         this.expect(quote);
     }
 
@@ -581,13 +607,13 @@ Parser.prototype.parseNamedExportList = function() {
 };
 
 /** @returns {import("./ast-types.js").ExportAllNode} */
-Parser.prototype.parseExportAllFrom = function() {
+Parser.prototype.parseExportAllFrom = function () {
     this.expect("*");
     this.consumeWhiteSpace();
     this.expect("from");
     this.consumeWhiteSpace();
     const quote = this.consumeChar();
-    const source = this.consumeWhile(c => c !== quote);
+    const source = this.consumeWhile((c) => c !== quote);
     this.expect(quote);
     if (this.startsWith(";")) this.consumeChar();
     return { type: "export-all", source };
@@ -596,7 +622,7 @@ Parser.prototype.parseExportAllFrom = function() {
 // JSX elements & attributes
 
 /** @returns {import("./ast-types.js").ElementNode} */
-Parser.prototype.parseElement = function() {
+Parser.prototype.parseElement = function () {
     this.expect("<");
     let rawTagName = this.parseName();
     // Member-expression tag names: <Menu.Item>, <Tabs.TabPane> - "." isn't
@@ -641,7 +667,7 @@ Parser.prototype.parseElement = function() {
             this.expect("</>");
         } else {
             this.expect("</");
-            const closingName = this.consumeWhile(c => c !== ">").trim();
+            const closingName = this.consumeWhile((c) => c !== ">").trim();
             this.expect(">");
             if (closingName !== rawTagName) {
                 this.error(`Mismatched closing tag: expected "</${rawTagName}>" but found "</${closingName}>"`);
@@ -653,14 +679,14 @@ Parser.prototype.parseElement = function() {
 };
 
 /** @returns {string} */
-Parser.prototype.parseSpreadAttribute = function() {
+Parser.prototype.parseSpreadAttribute = function () {
     this.expect("{");
     this.expect("...");
     return this.consumeBraceBody();
 };
 
 /** @returns {[string, import("./ast-types.js").AttributeValue]} */
-Parser.prototype.parseAttribute = function() {
+Parser.prototype.parseAttribute = function () {
     const name = this.parseName();
     this.consumeWhiteSpace();
 
@@ -674,12 +700,12 @@ Parser.prototype.parseAttribute = function() {
 };
 
 /** @returns {import("./ast-types.js").AttributeValue} */
-Parser.prototype.parseAttributeValue = function() {
+Parser.prototype.parseAttributeValue = function () {
     const firstChar = this.nextChar();
 
     if (firstChar === "'" || firstChar === '"') {
         const quote = this.consumeChar();
-        const value = this.consumeWhile(c => c !== quote);
+        const value = this.consumeWhile((c) => c !== quote);
         this.expect(quote);
         return { type: "string", value };
     }
