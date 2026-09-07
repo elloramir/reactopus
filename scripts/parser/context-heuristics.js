@@ -15,6 +15,7 @@ const EXPR_START_KEYWORDS = new Set([
     "yield", "await", "case", "do", "else", "default", "throw",
 ]);
 
+/** @param {string} input @param {number} pos @returns {boolean} */
 export function precedingContextAllowsExpression(input, pos) {
     let i = pos - 1;
     while (i >= 0 && isWhitespace(input[i])) i--;
@@ -30,6 +31,7 @@ export function precedingContextAllowsExpression(input, pos) {
     return EXPR_START_KEYWORDS.has(word);
 }
 
+/** @param {string} input @param {number} pos @param {{requireExpressionContext?: boolean}} [options] @returns {boolean} */
 export function looksLikeTagStart(input, pos, { requireExpressionContext = false } = {}) {
     if (input[pos] !== "<") return false;
     if (input[pos + 1] === "/") return false; // closing tag
@@ -38,6 +40,7 @@ export function looksLikeTagStart(input, pos, { requireExpressionContext = false
     return /[a-zA-Z]/.test(input[pos + 1] || "");
 }
 
+/** @param {string} input @param {number} pos @returns {boolean} */
 export function looksLikeClosingTagStart(input, pos) {
     if (input[pos] !== "<" || input[pos + 1] !== "/") return false;
     if (input[pos + 2] === ">") return true; // fragment </>

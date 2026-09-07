@@ -4,6 +4,7 @@
 // value that itself contains a top-level "=" (an arrow function) can confuse
 // this - accepted tradeoff for a destructuring export, which is rare anyway.
 
+/** @param {string} str @param {string} sep @returns {string[]} */
 function splitTopLevel(str, sep) {
     const parts = [];
     let depth = 0;
@@ -49,15 +50,21 @@ function splitTopLevel(str, sep) {
     return parts;
 }
 
+/** @param {string} str @returns {string|null} */
 function firstIdentifier(str) {
     const match = str.trim().match(/^[a-zA-Z_$][a-zA-Z0-9_$]*/);
     return match ? match[0] : null;
 }
 
+// Explicit @returns is required here, not just style: this function calls
+// itself, and TS can't infer a self-recursive function's return type on its
+// own (it would otherwise silently fall back to `any`, defeating the point).
+/** @param {string} patternSrc @returns {string[]} */
 export function extractPatternBindings(patternSrc) {
     const trimmed = patternSrc.trim();
     const inner = trimmed.slice(1, -1);
     const segments = splitTopLevel(inner, ",");
+    /** @type {string[]} */
     const names = [];
 
     for (let seg of segments) {

@@ -1,4 +1,4 @@
-import { isIdentifierChar, isQuoteChar, isWhitespace } from "./char-classes.js";
+import { isIdentifierChar, isNameChar, isQuoteChar, isWhitespace } from "./char-classes.js";
 import { looksLikeTagStart, precedingContextAllowsExpression } from "./context-heuristics.js";
 import { normalizeJSXText } from "./jsx-whitespace.js";
 import { extractPatternBindings } from "./pattern-bindings.js";
@@ -9,14 +9,13 @@ import { extractPatternBindings } from "./pattern-bindings.js";
 // almost verbatim. The parser only decides STRUCTURE (is this a tag, an
 // export, a string); turning that structure into JS source is the
 // transpiler's job.
+/** @param {string} input */
 export default function Parser(input) {
     this.input = input;
     this.pos = 0;
 }
 
-/**
- * 1. Navigation & basic consumption
- */
+// Navigation & basic consumption
 
 Parser.prototype.eof = function() {
     return this.pos >= this.input.length;
@@ -26,12 +25,14 @@ Parser.prototype.nextChar = function() {
     return this.input[this.pos];
 };
 
+/** @param {string} str @returns {boolean} */
 Parser.prototype.startsWith = function(str) {
     return this.input.startsWith(str, this.pos);
 };
 
 // Keyword check with word-boundary guards on both sides, so "export" doesn't
 // match inside "foo.export" or "myexport".
+/** @param {string} word @returns {boolean} */
 Parser.prototype.matchesKeyword = function(word) {
     if (!this.startsWith(word)) return false;
     const before = this.input[this.pos - 1];
@@ -41,6 +42,7 @@ Parser.prototype.matchesKeyword = function(word) {
     return true;
 };
 
+/** @param {string} message @returns {never} */
 Parser.prototype.error = function(message) {
     let line = 1;
     let col = 1;
@@ -55,6 +57,7 @@ Parser.prototype.error = function(message) {
     throw new Error(`Parser Error: ${message} (line ${line}, col ${col}, pos ${this.pos})`);
 };
 
+/** @param {string} str */
 Parser.prototype.expect = function(str) {
     if (this.startsWith(str)) {
         this.pos += str.length;
@@ -67,6 +70,7 @@ Parser.prototype.consumeChar = function() {
     return this.input[this.pos++];
 };
 
+/** @param {(ch: string) => boolean} predicate @returns {string} */
 Parser.prototype.consumeWhile = function(predicate) {
     let res = "";
     while (!this.eof() && predicate(this.nextChar())) {
@@ -79,14 +83,13 @@ Parser.prototype.consumeWhiteSpace = function() {
     this.consumeWhile(isWhitespace);
 };
 
-/**
- * 2. Tokenizers: names, strings, comments, regex literals, balanced blocks
- */
+// Tokenizers: names, strings, comments, regex literals, balanced blocks
 
 Parser.prototype.parseName = function() {
-    return this.consumeWhile(ch => /[a-zA-Z0-9:_-]/.test(ch));
+    return this.consumeWhile(isNameChar);
 };
 
+/** @param {string} quoteChar @returns {string} */
 Parser.prototype.consumeStringLiteral = function(quoteChar) {
     if (this.nextChar() !== quoteChar) {
         this.error(`Expected string start "${quoteChar}"`);
@@ -120,12 +123,14 @@ Parser.prototype.consumeStringLiteral = function(quoteChar) {
     return value;
 };
 
+/** @returns {string} */
 Parser.prototype.consumeLineComment = function() {
     let value = this.consumeChar() + this.consumeChar(); // "//"
     value += this.consumeWhile(ch => ch !== "\n");
     return value;
 };
 
+/** @returns {string} */
 Parser.prototype.consumeBlockComment = function() {
     let value = this.consumeChar() + this.consumeChar(); // "/*"
     while (!this.eof() && !this.startsWith("*/")) {
@@ -138,6 +143,7 @@ Parser.prototype.consumeBlockComment = function() {
 };
 
 // Returns the consumed regex literal, or null if this "/" isn't one (pos is left untouched on null).
+/** @returns {string|null} */
 Parser.prototype.tryConsumeRegexLiteral = function() {
     if (this.nextChar() !== "/") return null;
     if (this.input[this.pos + 1] === "/" || this.input[this.pos + 1] === "*") return null;
@@ -176,6 +182,7 @@ Parser.prototype.tryConsumeRegexLiteral = function() {
 };
 
 // Skips string/comment/regex content atomically so their braces never disturb depth counting.
+/** @param {string} openChar @param {string} closeChar @returns {string} */
 Parser.prototype.consumeBalancedBlock = function(openChar, closeChar) {
     if (this.nextChar() !== openChar) this.error(`Expected "${openChar}"`);
 
@@ -217,6 +224,7 @@ Parser.prototype.consumeBalancedBlock = function(openChar, closeChar) {
 };
 
 // Consumes up to the matching "}" (the opening "{" must already be consumed).
+/** @returns {string} */
 Parser.prototype.consumeBraceBody = function() {
     let depth = 1;
     let value = "";
@@ -262,19 +270,19 @@ Parser.prototype.consumeBraceBody = function() {
     return value;
 };
 
-/**
- * 3. Core scanner. Top-level module code, JSX children and JSX
- * {expression} bodies are all "JS-ish content interrupted by JSX elements,
- * comments, strings, regexes and (sometimes) exports" - they only differ in
- * whether bare "<" is JSX-heuristic-gated, whether whitespace collapses per
- * JSX text rules, and where scanning stops.
- */
+// Core scanner. Top-level module code, JSX children and JSX {expression}
+// bodies are all "JS-ish content interrupted by JSX elements, comments,
+// strings, regexes and (sometimes) exports" - they only differ in whether
+// bare "<" is JSX-heuristic-gated, whether whitespace collapses per JSX
+// text rules, and where scanning stops.
 
 // isJSXMode: true for JSX children/text, false for JS code.
 // stopChars: if set, stop at the first of these chars seen at bracket-depth 0
 // (used to find the end of one `export const NAME = <initializer>` declarator
 // without being fooled by commas/semicolons nested inside it).
+/** @param {boolean} isJSXMode @param {string[]|null} stopChars @returns {import("./ast-types.js").AstNode[]} */
 Parser.prototype.scanMixedContent = function(isJSXMode, stopChars) {
+    /** @type {import("./ast-types.js").AstNode[]} */
     const nodes = [];
     let buffer = "";
     let depth = 0;
@@ -350,12 +358,14 @@ Parser.prototype.scanMixedContent = function(isJSXMode, stopChars) {
     return nodes;
 };
 
+/** @returns {import("./ast-types.js").AstNode[]} */
 Parser.prototype.parse = function() {
     const imports = this.parseAllImports();
     const nodes = this.scanMixedContent(false, null);
     return [...imports, ...nodes];
 };
 
+/** @returns {import("./ast-types.js").ContentExpressionNode} */
 Parser.prototype.parseExpression = function() {
     this.expect("{");
     const children = this.scanMixedContent(false, ["}"]);
@@ -363,11 +373,11 @@ Parser.prototype.parseExpression = function() {
     return { type: "expression", children };
 };
 
-/**
- * 4. import ... from "...";
- */
+// import ... from "...";
 
+/** @returns {import("./ast-types.js").ImportNode[]} */
 Parser.prototype.parseAllImports = function() {
+    /** @type {import("./ast-types.js").ImportNode[]} */
     const imports = [];
     this.consumeWhiteSpace();
     while (this.matchesKeyword("import")) {
@@ -377,6 +387,7 @@ Parser.prototype.parseAllImports = function() {
     return imports;
 };
 
+/** @returns {import("./ast-types.js").ImportNode} */
 Parser.prototype.parseImport = function() {
     this.expect("import");
     this.consumeWhiteSpace();
@@ -388,14 +399,17 @@ Parser.prototype.parseImport = function() {
         const source = this.consumeWhile(c => c !== ch);
         this.expect(ch);
         if (this.startsWith(";")) this.consumeChar();
-        return { type: "import", specifiers: null, source };
+        return { type: "import", specifierText: null, source };
     }
 
-    let specifiers = "";
+    // Everything between "import" and "from", verbatim: "React", "{ a, b }",
+    // "React, { a }", "* as NS". The transpiler pattern-matches this text
+    // directly rather than the parser breaking it into a structured shape.
+    let specifierText = "";
     while (!this.eof() && !this.matchesKeyword("from")) {
-        specifiers += this.consumeChar();
+        specifierText += this.consumeChar();
     }
-    specifiers = specifiers.trim();
+    specifierText = specifierText.trim();
 
     this.expect("from");
     this.consumeWhiteSpace();
@@ -406,18 +420,17 @@ Parser.prototype.parseImport = function() {
 
     if (this.startsWith(";")) this.consumeChar();
 
-    return { type: "import", specifiers, source };
+    return { type: "import", specifierText, source };
 };
 
-/**
- * 5. export statement parsing. Only extracts structure (kind, names,
- * pattern source, nested initializer nodes) - the transpiler decides what
- * JS code each piece becomes. Doing it here at parse time (instead of the
- * old approach of a transpile-time regex over merged text) means an
- * initializer's JSX still gets parsed into real elements, and a string
- * literal that happens to contain the words "export default" is untouched.
- */
+// export statement parsing. Only extracts structure (kind, names, pattern
+// source, nested initializer nodes) - the transpiler decides what JS code
+// each piece becomes. Doing it here at parse time (instead of the old
+// approach of a transpile-time regex over merged text) means an
+// initializer's JSX still gets parsed into real elements, and a string
+// literal that happens to contain the words "export default" is untouched.
 
+/** @returns {import("./ast-types.js").AstNode} */
 Parser.prototype.parseExportStatement = function() {
     this.expect("export");
     this.consumeWhiteSpace();
@@ -463,14 +476,16 @@ Parser.prototype.parseExportStatement = function() {
         return this.parseExportAllFrom();
     }
 
-    this.error("Unsupported export syntax");
+    return this.error("Unsupported export syntax");
 };
 
 // `export const a = <expr>, {b, c} = <expr2>;`. Each initializer is scanned
 // with scanMixedContent (not grabbed as a plain string) so JSX inside it -
 // e.g. `export const Foo = () => <div>...</div>` - still parses into real
 // element nodes instead of being swallowed as opaque text.
+/** @param {"const"|"let"|"var"} keyword @returns {import("./ast-types.js").ExportDeclaratorsNode} */
 Parser.prototype.parseExportDeclarators = function(keyword) {
+    /** @type {import("./ast-types.js").Declarator[]} */
     const declarators = [];
 
     while (true) {
@@ -518,8 +533,10 @@ Parser.prototype.parseExportDeclarators = function(keyword) {
     return { type: "export-declarators", keyword, declarators };
 };
 
+/** @returns {import("./ast-types.js").ExportNamedNode} */
 Parser.prototype.parseNamedExportList = function() {
     this.expect("{");
+    /** @type {import("./ast-types.js").ExportSpecifier[]} */
     const specifiers = [];
 
     while (true) {
@@ -563,6 +580,7 @@ Parser.prototype.parseNamedExportList = function() {
     return { type: "export-named", specifiers, source };
 };
 
+/** @returns {import("./ast-types.js").ExportAllNode} */
 Parser.prototype.parseExportAllFrom = function() {
     this.expect("*");
     this.consumeWhiteSpace();
@@ -575,10 +593,9 @@ Parser.prototype.parseExportAllFrom = function() {
     return { type: "export-all", source };
 };
 
-/**
- * 6. JSX elements & attributes
- */
+// JSX elements & attributes
 
+/** @returns {import("./ast-types.js").ElementNode} */
 Parser.prototype.parseElement = function() {
     this.expect("<");
     let rawTagName = this.parseName();
@@ -591,6 +608,7 @@ Parser.prototype.parseElement = function() {
     }
     const isFragment = rawTagName === "";
 
+    /** @type {import("./ast-types.js").ElementAttribute[]} */
     const attributes = [];
     while (true) {
         this.consumeWhiteSpace();
@@ -610,6 +628,7 @@ Parser.prototype.parseElement = function() {
         attributes.push({ kind: "attr", name, value });
     }
 
+    /** @type {import("./ast-types.js").AstNode[]} */
     let children = [];
     if (this.startsWith("/>")) {
         if (isFragment) this.error("Fragments cannot be self-closing");
@@ -633,12 +652,14 @@ Parser.prototype.parseElement = function() {
     return { type: "element", tagName: isFragment ? null : rawTagName, attributes, children };
 };
 
+/** @returns {string} */
 Parser.prototype.parseSpreadAttribute = function() {
     this.expect("{");
     this.expect("...");
     return this.consumeBraceBody();
 };
 
+/** @returns {[string, import("./ast-types.js").AttributeValue]} */
 Parser.prototype.parseAttribute = function() {
     const name = this.parseName();
     this.consumeWhiteSpace();
@@ -652,6 +673,7 @@ Parser.prototype.parseAttribute = function() {
     return [name, this.parseAttributeValue()];
 };
 
+/** @returns {import("./ast-types.js").AttributeValue} */
 Parser.prototype.parseAttributeValue = function() {
     const firstChar = this.nextChar();
 
@@ -668,5 +690,5 @@ Parser.prototype.parseAttributeValue = function() {
         return { type: "expression", value };
     }
 
-    this.error("Expected a quoted string or {expression} for attribute value");
+    return this.error("Expected a quoted string or {expression} for attribute value");
 };
