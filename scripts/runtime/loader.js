@@ -65,7 +65,7 @@ async function fetchAndParse(url) {
         if (!res.ok) throw new Error(`HTTP ${res.status} for ${url}`);
 
         const source = await res.text();
-        const compiled = compileSource(source, url);
+        const compiled = await compileSource(source, url);
 
         registerCompiledFile(url, compiled);
         scanImportSources(compiled.imports, url);

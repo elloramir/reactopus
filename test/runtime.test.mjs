@@ -6,6 +6,7 @@ import Parser from "../scripts/parser/index.js";
 import transpile from "../scripts/transpiler/index.js";
 import { configureSandbox, executeCompiled } from "../scripts/runtime/sandbox.js";
 import { boot, resetRuntimeState } from "../scripts/runtime/bootloader.js";
+import { readCompiled, writeCompiled } from "../scripts/runtime/compile-cache.js";
 import { installDom, installVirtualFetch } from "./dom-env.mjs";
 
 // DOM/component/event/bootloader behavior. Pure parser+transpiler output is
@@ -448,6 +449,42 @@ describe("error handling", () => {
 
         assert.ok(container.querySelector('[data-testid="fallback"]'));
         assert.match(container.textContent, /Something broke/);
+    });
+});
+
+describe("compile cache", () => {
+    // jsdom doesn't implement indexedDB, so these exercise storage.js's
+    // localStorage fallback - the IndexedDB path is exactly the same
+    // interface (CompileCacheStorage), just a different backend.
+    it("a source never written returns null", (t) => {
+        installDom();
+        t.after(() => window.localStorage.clear());
+        return readCompiled("this source was never cached").then((result) => {
+            assert.equal(result, null);
+        });
+    });
+
+    it("round-trips a written value back out for the same source", async (t) => {
+        installDom();
+        t.after(() => window.localStorage.clear());
+
+        const source = "export const x = 1;";
+        const compiled = { code: "exports.x = 1;", imports: [] };
+
+        await writeCompiled(source, compiled);
+        const result = await readCompiled(source);
+
+        assert.deepEqual(result, compiled);
+    });
+
+    it("different source text does not collide on the same cache key", async (t) => {
+        installDom();
+        t.after(() => window.localStorage.clear());
+
+        await writeCompiled("export const a = 1;", { code: "exports.a = 1;", imports: [] });
+        const result = await readCompiled("export const b = 2;");
+
+        assert.equal(result, null);
     });
 });
 

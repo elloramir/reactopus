@@ -50,13 +50,13 @@ function resolveUseCache(url) {
  * @param {string} source
  * @param {string} url
  * @param {{useCache?: boolean}} [options]
- * @returns {import("./types.js").CompiledModule}
+ * @returns {Promise<import("./types.js").CompiledModule>}
  */
-export function compileSource(source, url, options) {
+export async function compileSource(source, url, options) {
     const shouldUseCache = options && options.useCache !== undefined ? options.useCache : resolveUseCache(url);
 
     if (shouldUseCache) {
-        const cached = readCompiled(source);
+        const cached = await readCompiled(source);
         if (cached) {
             if (debug) console.debug(`[Reactopus] cache hit: ${url}`);
             return cached;
@@ -67,6 +67,6 @@ export function compileSource(source, url, options) {
     const code = transpile(ast);
     const compiled = { code, imports: extractImportSources(ast) };
 
-    if (shouldUseCache) writeCompiled(source, compiled);
+    if (shouldUseCache) await writeCompiled(source, compiled);
     return compiled;
 }

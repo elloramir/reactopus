@@ -51,7 +51,7 @@ export async function boot(config) {
             // down with it, same isolation fetchAndParse gives remote files.
             try {
                 const source = block.textContent;
-                const compiled = compileSource(source, ownDocumentUrl, { useCache: useCacheOverride });
+                const compiled = await compileSource(source, ownDocumentUrl, { useCache: useCacheOverride });
                 scanImportSources(compiled.imports, ownDocumentUrl);
                 entryPoints.push({ type: "inline", compiled });
             } catch (e) {

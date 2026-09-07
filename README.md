@@ -20,7 +20,7 @@ The project includes:
 4. **Transpilation**: AST nodes are converted to JavaScript that calls Preact functions.
 5. **Execution**: Transpiled code runs with a custom CommonJS environment that maps `require()` calls to bundled modules (Preact, Preact Hooks, local files).
 
-Parsing and transpilation are pure functions of the source text, so step 2-4's result is cached in `localStorage`, keyed by a hash of the file's content (see `scripts/runtime/compile-cache.js`). A repeat page load with unchanged source skips parsing and transpiling entirely for that file.
+Parsing and transpilation are pure functions of the source text, so step 2-4's result is cached persistently, keyed by a hash of the file's content (see `scripts/runtime/compile-cache.js`). A repeat page load with unchanged source skips parsing and transpiling entirely for that file. The cache is stored in IndexedDB when it's available, falling back to `localStorage` otherwise (private browsing, storage disabled by policy, or a browser that never responds to `indexedDB.open()` at all - see `scripts/runtime/storage.js`).
 
 ## Startup configuration
 
