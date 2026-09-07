@@ -1,19 +1,18 @@
-/**
- * import ... from "..."  ->  require("...")
- * Runs in a CommonJS sandbox (see runtime/sandbox.js), so every import
- * becomes a plain `require` + destructure/assign.
- */
+// import ... from "..."  ->  require("...")
+// Runs in a CommonJS sandbox (see runtime/sandbox.js), so every import
+// becomes a plain `require` + destructure/assign.
+/** @param {import("../parser/ast-types.js").ImportNode} node @returns {string} */
 export function generateRequire(node) {
-    if (!node.specifiers) {
+    if (!node.specifierText) {
         return `require("${node.source}");\n`; // side-effect import: import "pkg";
     }
 
-    const { specifiers, source } = node;
+    const { specifierText, source } = node;
     const cleanSource = source.replace(/[^a-zA-Z0-9]/g, "_");
 
     // Named (+ optional default): import React, { useState, x as y } from "react"
-    if (specifiers.includes("{")) {
-        const [defPart, namedPart] = specifiers.split("{");
+    if (specifierText.includes("{")) {
+        const [defPart, namedPart] = specifierText.split("{");
         const defaultName = defPart.replace(",", "").trim();
         const names = namedPart
             .replace("}", "")
@@ -30,8 +29,8 @@ export function generateRequire(node) {
     }
 
     // Default + namespace combined: import Default, * as NS from "pkg"
-    if (specifiers.includes(",") && specifiers.includes("* as")) {
-        const [defPart, nsPart] = specifiers.split(",").map((s) => s.trim());
+    if (specifierText.includes(",") && specifierText.includes("* as")) {
+        const [defPart, nsPart] = specifierText.split(",").map((s) => s.trim());
         const alias = nsPart.replace("* as", "").trim();
         return (
             `const _pkg_${cleanSource} = require("${source}");\n` +
@@ -41,11 +40,19 @@ export function generateRequire(node) {
     }
 
     // Namespace only: import * as NS from "pkg"
-    if (specifiers.startsWith("* as")) {
-        const alias = specifiers.substring(4).trim();
+    if (specifierText.startsWith("* as")) {
+        const alias = specifierText.substring(4).trim();
         return `const ${alias} = require("${source}");\n`;
     }
 
     // Default only: import Default from "pkg"
-    return `const ${specifiers} = require("${source}").default || require("${source}");\n`;
+    return `const ${specifierText} = require("${source}").default || require("${source}");\n`;
+}
+
+// Pulls every import source (relative or package) out of an already-parsed
+// AST, without the caller needing to know the "import" node's shape - used
+// by runtime/compile.js to find a file's dependencies.
+/** @param {import("../parser/ast-types.js").AstNode[]} ast @returns {string[]} */
+export function extractImportSources(ast) {
+    return ast.filter((node) => node.type === "import").map((node) => node.source);
 }

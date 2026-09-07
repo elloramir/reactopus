@@ -13,6 +13,7 @@ import {
 // time (see parser/index.js parseExportStatement), so a "text" node just
 // passes through verbatim - no regex rewriting here means no risk of
 // corrupting a string literal that happens to contain "export default".
+/** @param {import("../parser/ast-types.js").AstNode} node @returns {string} */
 export function convertNode(node) {
     switch (node.type) {
         case "import":             return generateRequire(node);
@@ -29,6 +30,7 @@ export function convertNode(node) {
     }
 }
 
+/** @param {import("../parser/ast-types.js").AstNode[]} ast @returns {string} */
 export default function transpile(ast) {
     return ast.map(convertNode).join("");
 }

@@ -2,19 +2,23 @@ import { convertNode } from "./index.js";
 
 // Turns the parser's export-* structural nodes into CommonJS code.
 
+/** @returns {string} */
 export function generateExportDefault() {
     return "exports.default = ";
 }
 
+/** @param {import("../parser/ast-types.js").ExportFunctionNode} node @returns {string} */
 export function generateExportFunction(node) {
     const star = node.generator ? "*" : "";
     return `exports.${node.name} = function ${star}${node.name}`;
 }
 
+/** @param {import("../parser/ast-types.js").ExportClassNode} node @returns {string} */
 export function generateExportClass(node) {
     return `exports.${node.name} = class ${node.name}`;
 }
 
+/** @param {import("../parser/ast-types.js").ExportDeclaratorsNode} node @returns {string} */
 export function generateExportDeclarators(node) {
     const parts = node.declarators.map((decl) => {
         const target = decl.isPattern ? decl.patternSrc : decl.name;
@@ -35,6 +39,7 @@ export function generateExportDeclarators(node) {
     return code;
 }
 
+/** @param {import("../parser/ast-types.js").ExportNamedNode} node @returns {string} */
 export function generateExportNamed(node) {
     if (node.source) {
         const cleanSource = node.source.replace(/[^a-zA-Z0-9]/g, "_");
@@ -47,6 +52,7 @@ export function generateExportNamed(node) {
     return node.specifiers.map(({ local, exported }) => `exports.${exported} = ${local};`).join(" ");
 }
 
+/** @param {import("../parser/ast-types.js").ExportAllNode} node @returns {string} */
 export function generateExportAll(node) {
     return `Object.assign(exports, require("${node.source}"));\n`;
 }
