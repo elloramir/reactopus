@@ -44,9 +44,17 @@ This only affects that entry file, not the files it imports.
 
 ## Testing
 
-`npm test` runs the automated suite (`test/runtime.test.mjs`) under Node's built-in test runner against a virtualized DOM (`jsdom`) - no browser, no fixture files on disk. Each test defines its own JSX source as a string, parses and transpiles it with the real parser/transpiler, executes it through the real sandbox, and asserts on the resulting DOM (including simulated clicks/typing). One test wires up a two-file dependency graph and a stubbed `fetch` (`installVirtualFetch` in `test/dom-env.mjs`) to exercise the real loader/cache/sandbox pipeline end-to-end. `npm run build` runs the suite automatically first (`prebuild`) and refuses to produce `reactopus.min.js` if anything fails.
+`npm test` runs the automated suite under Node's built-in test runner against a virtualized DOM (`jsdom`) - no browser, no fixture files on disk. It's split in two:
+- `test/pipeline.test.mjs` - pure parser+transpiler unit tests (no DOM at all): every import/export form, JSX attribute/whitespace/comment/regex edge case, and the parser's error paths, asserting directly on the generated code or the evaluated module's exports.
+- `test/runtime.test.mjs` - component/DOM/event/bootloader tests. Each defines its own JSX source as a string, parses and transpiles it with the real parser/transpiler, executes it through the real sandbox, and asserts on the resulting DOM (clicks, typing, list reordering, an error boundary). One test wires up a two-file dependency graph and a stubbed `fetch` (`installVirtualFetch` in `test/dom-env.mjs`) to exercise the real loader/cache/sandbox pipeline end-to-end.
 
-`npm start` still runs `webpack-dev-server`, but there's no bundled demo page to serve anymore - it's only useful if you drop your own `.html` + `.jsx` next to it while iterating manually. `npm test` is the thing that verifies correctness.
+`npm run typecheck` runs TypeScript (pinned to the 6.x line - see below) in `--checkJs` mode over `scripts/` using the JSDoc type annotations in the code, with no build step and no `.ts` files. `npm run build` runs both the test suite and the typecheck automatically first (`prebuild`) and refuses to produce `reactopus.min.js` if either fails.
+
+`npm start` still runs `webpack-dev-server`, but there's no bundled demo page to serve anymore - it's only useful if you drop your own `.html` + `.jsx` next to it while iterating manually. `npm test`/`npm run typecheck` are what verify correctness.
+
+### Why TypeScript is pinned to 6.x
+
+The parser (`scripts/parser/index.js`) and the task queue (`scripts/runtime/task-queue.js`) use the constructor-function-plus-`.prototype` style deliberately, not `class`. TypeScript's newer compiler (7.x, the Go-based rewrite) stops recognizing a construct signature written that way - `new Parser(x)` silently becomes `any`, masking real type errors instead of catching them. TypeScript 6.x handles this pattern correctly. If a future TypeScript major reintroduces support for it, this pin can be revisited.
 
 ## Important Notes
 
