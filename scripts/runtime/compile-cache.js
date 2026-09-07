@@ -7,6 +7,7 @@ import { fnv1aHash } from "../utils/hash.js";
 const CACHE_VERSION = "1";
 const KEY_PREFIX = `reactopus:compile:v${CACHE_VERSION}:`;
 
+/** @returns {Storage|null} */
 function getStorage() {
     try {
         return window.localStorage;
@@ -15,10 +16,12 @@ function getStorage() {
     }
 }
 
+/** @param {string} source @returns {string} */
 function keyFor(source) {
     return `${KEY_PREFIX}${fnv1aHash(source)}`;
 }
 
+/** @param {string} source @returns {import("./types.js").CompiledModule|null} */
 export function readCompiled(source) {
     const storage = getStorage();
     if (!storage) return null;
@@ -30,6 +33,7 @@ export function readCompiled(source) {
     }
 }
 
+/** @param {string} source @param {import("./types.js").CompiledModule} compiled */
 export function writeCompiled(source, compiled) {
     const storage = getStorage();
     if (!storage) return;

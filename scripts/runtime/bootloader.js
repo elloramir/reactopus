@@ -1,6 +1,7 @@
-import { configureLoader, enqueue, compile, scanImportSources, drainQueue, resetLoader } from "./loader.js";
+import { configureLoader, enqueue, scanImportSources, drainQueue, resetLoader } from "./loader.js";
 import { configureSandbox, executeModule, executeCompiled } from "./sandbox.js";
 import { resetModuleRegistry } from "./module-registry.js";
+import { compileSource } from "./compile.js";
 import { readEntryCacheOverride } from "../config.js";
 
 // A real page only ever calls boot() once, so loader/module-registry state
@@ -16,13 +17,17 @@ export function resetRuntimeState() {
 // Discovers <script type="text/jsx"> blocks, resolves their dependency
 // graph (fetch + parse + transpile, with the persistent cache short-circuiting
 // unchanged content), then executes every entry point in document order.
+/** @param {import("./types.js").LoaderConfig} config */
 export async function boot(config) {
     configureLoader(config);
 
     const ownDocumentUrl = window.location.href;
     configureSandbox({ ownDocumentUrl });
 
+    /** @type {NodeListOf<HTMLScriptElement>} */
     const codeBlocks = document.querySelectorAll("script[type='text/jsx']");
+    /** @typedef {{type: "url", url: string}|{type: "inline", compiled: import("./types.js").CompiledModule}} EntryPoint */
+    /** @type {EntryPoint[]} */
     const entryPoints = [];
 
     for (const block of codeBlocks) {
@@ -38,7 +43,7 @@ export async function boot(config) {
             // down with it, same isolation fetchAndParse gives remote files.
             try {
                 const source = block.textContent;
-                const compiled = compile(source, ownDocumentUrl, { useCache: useCacheOverride });
+                const compiled = compileSource(source, ownDocumentUrl, { useCache: useCacheOverride });
                 scanImportSources(compiled.imports, ownDocumentUrl);
                 entryPoints.push({ type: "inline", compiled });
             } catch (e) {

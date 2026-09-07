@@ -1,26 +1,30 @@
-import { getBuiltin, isRegistered, getRegisteredExports, registerModule } from "./module-registry.js";
-import { hasCompiledFile, getCompiledFile } from "./loader.js";
+import { getBuiltin, isRegistered, getRegisteredExports, registerModule, hasCompiledFile, getCompiledFile } from "./module-registry.js";
 
+/** @type {string|null} */
 let ownDocumentUrl = null;
 
+/** @param {{ownDocumentUrl: string}} config */
 export function configureSandbox(config) {
     ownDocumentUrl = config.ownDocumentUrl;
 }
 
-function customRequire(path, fromUrl) {
+/** @param {string} path @param {string} baseUrl @returns {Object} */
+function customRequire(path, baseUrl) {
     const builtin = getBuiltin(path);
     if (builtin !== undefined) return builtin;
 
     let targetUrl = path;
-    if (path.startsWith(".")) targetUrl = new URL(path, fromUrl).href;
+    if (path.startsWith(".")) targetUrl = new URL(path, baseUrl).href;
 
     if (isRegistered(targetUrl)) return getRegisteredExports(targetUrl);
     if (hasCompiledFile(targetUrl)) return executeModule(targetUrl);
 
-    throw new Error(`[Runtime] Module not loaded: ${path}`);
+    throw new Error(`[Reactopus] Module not loaded: ${path}`);
 }
 
-export function executeCompiled(compiled, fullUrl) {
+/** @param {import("./types.js").CompiledModule} compiled @param {string} url @returns {Object} */
+export function executeCompiled(compiled, url) {
+    /** @type {import("./types.js").ModuleRecord} */
     const module = { exports: {} };
 
     // Register before running the factory: a circular require() then sees
@@ -32,25 +36,26 @@ export function executeCompiled(compiled, fullUrl) {
     // level, before the cycle finishes, sees whatever was exported so far
     // (often undefined) - this doesn't give ES modules' live-binding
     // behavior, it just stops the stack overflow.
-    if (fullUrl !== ownDocumentUrl) registerModule(fullUrl, module);
+    if (url !== ownDocumentUrl) registerModule(url, module);
 
     try {
         const factory = new Function("require", "module", "exports", compiled.code);
-        factory((path) => customRequire(path, fullUrl), module, module.exports);
+        factory((path) => customRequire(path, url), module, module.exports);
     } catch (e) {
-        module.error = e;
-        console.error(`[Runtime] Execution error in ${fullUrl}:`, e);
-        console.debug("Transpiled code:", compiled.code);
+        module.error = /** @type {Error} */ (e);
+        console.error(`[Reactopus] Execution error in ${url}:`, e);
+        console.debug("[Reactopus] Transpiled code:", compiled.code);
     }
 
     return module.exports;
 }
 
+/** @param {string} url @returns {Object} */
 export function executeModule(url) {
     if (isRegistered(url)) return getRegisteredExports(url);
 
     const compiled = getCompiledFile(url);
-    if (!compiled) throw new Error(`[Runtime] Source not found in cache: ${url}`);
+    if (!compiled) throw new Error(`[Reactopus] Source not found in cache: ${url}`);
 
     return executeCompiled(compiled, url);
 }
