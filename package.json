@@ -2,9 +2,15 @@
   "name": "reactopus",
   "version": "1.0.0",
   "description": "Custom React-like runtime",
+  "type": "module",
   "main": "scripts/index.js",
+  "engines": {
+    "node": ">=22.22.2"
+  },
   "scripts": {
     "start": "webpack serve",
+    "test": "node --test test/*.test.mjs",
+    "prebuild": "npm test",
     "build": "webpack --mode production",
     "build:dev": "webpack --mode development"
   },
@@ -12,6 +18,7 @@
     "preact": "^10.19.3"
   },
   "devDependencies": {
+    "jsdom": "^30.0.1",
     "webpack": "^5.90.0",
     "webpack-cli": "^5.1.0",
     "webpack-dev-server": "^5.2.2"
