@@ -4,11 +4,15 @@ import { isRegistered, hasCompiledFile, registerCompiledFile } from "./module-re
 
 // One page load = one boot = one dependency graph, so this is plain module
 // state (like module-registry.js) rather than an instantiable loader object.
-/** @type {Set<string>} */
+/**
+ * @type {Set<string>}
+ */
 const visited = new Set();
 const queue = new TaskQueue(4);
 
-/** @param {import("./types.js").LoaderConfig} config */
+/**
+ * @param {import("./types.js").LoaderConfig} config
+ */
 export function configureLoader(config) {
     queue.setConcurrency(config.concurrency);
     configureCompiler({ useCache: config.cache, debug: config.debug });
@@ -50,7 +54,9 @@ export function enqueue(url, options) {
     }
 }
 
-/** @param {string} url */
+/**
+ * @param {string} url
+ */
 async function fetchAndParse(url) {
     try {
         if (isRegistered(url) || hasCompiledFile(url)) return;
@@ -71,7 +77,9 @@ async function fetchAndParse(url) {
 // Fixed-size worker pool: each worker pulls the next queued URL as soon as
 // it's free, instead of waiting for a whole batch to settle before starting
 // newly-discovered dependencies.
-/** @returns {Promise<void>} */
+/**
+ * @returns {Promise<void>}
+ */
 export function drainQueue() {
     return queue.drain(fetchAndParse);
 }

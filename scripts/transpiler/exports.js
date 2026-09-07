@@ -2,7 +2,9 @@ import { convertNode } from "./index.js";
 
 // Turns the parser's export-* structural nodes into CommonJS code.
 
-/** @returns {string} */
+/**
+ * @returns {string}
+ */
 export function generateExportDefault() {
     return "exports.default = ";
 }

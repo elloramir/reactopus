@@ -17,17 +17,25 @@ export function resetRuntimeState() {
 // Discovers <script type="text/jsx"> blocks, resolves their dependency
 // graph (fetch + parse + transpile, with the persistent cache short-circuiting
 // unchanged content), then executes every entry point in document order.
-/** @param {import("./types.js").LoaderConfig} config */
+/**
+ * @param {import("./types.js").LoaderConfig} config
+ */
 export async function boot(config) {
     configureLoader(config);
 
     const ownDocumentUrl = window.location.href;
     configureSandbox({ ownDocumentUrl });
 
-    /** @type {NodeListOf<HTMLScriptElement>} */
+    /**
+     * @type {NodeListOf<HTMLScriptElement>}
+     */
     const codeBlocks = document.querySelectorAll("script[type='text/jsx']");
-    /** @typedef {{type: "url", url: string}|{type: "inline", compiled: import("./types.js").CompiledModule}} EntryPoint */
-    /** @type {EntryPoint[]} */
+    /**
+     * @typedef {{type: "url", url: string}|{type: "inline", compiled: import("./types.js").CompiledModule}} EntryPoint
+     */
+    /**
+     * @type {EntryPoint[]}
+     */
     const entryPoints = [];
 
     for (const block of codeBlocks) {

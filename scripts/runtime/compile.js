@@ -6,13 +6,17 @@ import { readCompiled, writeCompiled } from "./compile-cache.js";
 // Parsing+transpiling a URL's source, with the per-URL data-cache="false"
 // override and the persistent content-hash cache (compile-cache.js) that
 // skips both steps entirely on a hit.
-/** @type {Map<string, boolean>} */
+/**
+ * @type {Map<string, boolean>}
+ */
 const cacheOverrides = new Map();
 
 let useCache = true;
 let debug = false;
 
-/** @param {{useCache: boolean, debug: boolean}} config */
+/**
+ * @param {{useCache: boolean, debug: boolean}} config
+ */
 export function configureCompiler(config) {
     useCache = config.useCache;
     debug = config.debug;

@@ -9,7 +9,9 @@ import { extractPatternBindings } from "./pattern-bindings.js";
 // almost verbatim. The parser only decides STRUCTURE (is this a tag, an
 // export, a string); turning that structure into JS source is the
 // transpiler's job.
-/** @param {string} input */
+/**
+ * @param {string} input
+ */
 export default function Parser(input) {
     this.input = input;
     this.pos = 0;
@@ -66,7 +68,9 @@ Parser.prototype.error = function (message) {
     throw new Error(`Parser Error: ${message} (line ${line}, col ${col}, pos ${this.pos})`);
 };
 
-/** @param {string} str */
+/**
+ * @param {string} str
+ */
 Parser.prototype.expect = function (str) {
     if (this.startsWith(str)) {
         this.pos += str.length;
@@ -138,14 +142,18 @@ Parser.prototype.consumeStringLiteral = function (quoteChar) {
     return value;
 };
 
-/** @returns {string} */
+/**
+ * @returns {string}
+ */
 Parser.prototype.consumeLineComment = function () {
     let value = this.consumeChar() + this.consumeChar(); // "//"
     value += this.consumeWhile((ch) => ch !== "\n");
     return value;
 };
 
-/** @returns {string} */
+/**
+ * @returns {string}
+ */
 Parser.prototype.consumeBlockComment = function () {
     let value = this.consumeChar() + this.consumeChar(); // "/*"
     while (!this.eof() && !this.startsWith("*/")) {
@@ -158,7 +166,9 @@ Parser.prototype.consumeBlockComment = function () {
 };
 
 // Returns the consumed regex literal, or null if this "/" isn't one (pos is left untouched on null).
-/** @returns {string|null} */
+/**
+ * @returns {string|null}
+ */
 Parser.prototype.tryConsumeRegexLiteral = function () {
     if (this.nextChar() !== "/") return null;
     if (this.input[this.pos + 1] === "/" || this.input[this.pos + 1] === "*") return null;
@@ -243,7 +253,9 @@ Parser.prototype.consumeBalancedBlock = function (openChar, closeChar) {
 };
 
 // Consumes up to the matching "}" (the opening "{" must already be consumed).
-/** @returns {string} */
+/**
+ * @returns {string}
+ */
 Parser.prototype.consumeBraceBody = function () {
     let depth = 1;
     let value = "";
@@ -305,7 +317,9 @@ Parser.prototype.consumeBraceBody = function () {
  * @returns {import("./ast-types.js").AstNode[]}
  */
 Parser.prototype.scanMixedContent = function (isJSXMode, stopChars) {
-    /** @type {import("./ast-types.js").AstNode[]} */
+    /**
+     * @type {import("./ast-types.js").AstNode[]}
+     */
     const nodes = [];
     let buffer = "";
     let depth = 0;
@@ -381,14 +395,18 @@ Parser.prototype.scanMixedContent = function (isJSXMode, stopChars) {
     return nodes;
 };
 
-/** @returns {import("./ast-types.js").AstNode[]} */
+/**
+ * @returns {import("./ast-types.js").AstNode[]}
+ */
 Parser.prototype.parse = function () {
     const imports = this.parseAllImports();
     const nodes = this.scanMixedContent(false, null);
     return [...imports, ...nodes];
 };
 
-/** @returns {import("./ast-types.js").ContentExpressionNode} */
+/**
+ * @returns {import("./ast-types.js").ContentExpressionNode}
+ */
 Parser.prototype.parseExpression = function () {
     this.expect("{");
     const children = this.scanMixedContent(false, ["}"]);
@@ -398,9 +416,13 @@ Parser.prototype.parseExpression = function () {
 
 // import ... from "...";
 
-/** @returns {import("./ast-types.js").ImportNode[]} */
+/**
+ * @returns {import("./ast-types.js").ImportNode[]}
+ */
 Parser.prototype.parseAllImports = function () {
-    /** @type {import("./ast-types.js").ImportNode[]} */
+    /**
+     * @type {import("./ast-types.js").ImportNode[]}
+     */
     const imports = [];
     this.consumeWhiteSpace();
     while (this.matchesKeyword("import")) {
@@ -410,7 +432,9 @@ Parser.prototype.parseAllImports = function () {
     return imports;
 };
 
-/** @returns {import("./ast-types.js").ImportNode} */
+/**
+ * @returns {import("./ast-types.js").ImportNode}
+ */
 Parser.prototype.parseImport = function () {
     this.expect("import");
     this.consumeWhiteSpace();
@@ -453,7 +477,9 @@ Parser.prototype.parseImport = function () {
 // initializer's JSX still gets parsed into real elements, and a string
 // literal that happens to contain the words "export default" is untouched.
 
-/** @returns {import("./ast-types.js").AstNode} */
+/**
+ * @returns {import("./ast-types.js").AstNode}
+ */
 Parser.prototype.parseExportStatement = function () {
     this.expect("export");
     this.consumeWhiteSpace();
@@ -511,7 +537,9 @@ Parser.prototype.parseExportStatement = function () {
  * @returns {import("./ast-types.js").ExportDeclaratorsNode}
  */
 Parser.prototype.parseExportDeclarators = function (keyword) {
-    /** @type {import("./ast-types.js").Declarator[]} */
+    /**
+     * @type {import("./ast-types.js").Declarator[]}
+     */
     const declarators = [];
 
     while (true) {
@@ -559,10 +587,14 @@ Parser.prototype.parseExportDeclarators = function (keyword) {
     return { type: "export-declarators", keyword, declarators };
 };
 
-/** @returns {import("./ast-types.js").ExportNamedNode} */
+/**
+ * @returns {import("./ast-types.js").ExportNamedNode}
+ */
 Parser.prototype.parseNamedExportList = function () {
     this.expect("{");
-    /** @type {import("./ast-types.js").ExportSpecifier[]} */
+    /**
+     * @type {import("./ast-types.js").ExportSpecifier[]}
+     */
     const specifiers = [];
 
     while (true) {
@@ -606,7 +638,9 @@ Parser.prototype.parseNamedExportList = function () {
     return { type: "export-named", specifiers, source };
 };
 
-/** @returns {import("./ast-types.js").ExportAllNode} */
+/**
+ * @returns {import("./ast-types.js").ExportAllNode}
+ */
 Parser.prototype.parseExportAllFrom = function () {
     this.expect("*");
     this.consumeWhiteSpace();
@@ -621,7 +655,9 @@ Parser.prototype.parseExportAllFrom = function () {
 
 // JSX elements & attributes
 
-/** @returns {import("./ast-types.js").ElementNode} */
+/**
+ * @returns {import("./ast-types.js").ElementNode}
+ */
 Parser.prototype.parseElement = function () {
     this.expect("<");
     let rawTagName = this.parseName();
@@ -634,7 +670,9 @@ Parser.prototype.parseElement = function () {
     }
     const isFragment = rawTagName === "";
 
-    /** @type {import("./ast-types.js").ElementAttribute[]} */
+    /**
+     * @type {import("./ast-types.js").ElementAttribute[]}
+     */
     const attributes = [];
     while (true) {
         this.consumeWhiteSpace();
@@ -654,7 +692,9 @@ Parser.prototype.parseElement = function () {
         attributes.push({ kind: "attr", name, value });
     }
 
-    /** @type {import("./ast-types.js").AstNode[]} */
+    /**
+     * @type {import("./ast-types.js").AstNode[]}
+     */
     let children = [];
     if (this.startsWith("/>")) {
         if (isFragment) this.error("Fragments cannot be self-closing");
@@ -678,14 +718,18 @@ Parser.prototype.parseElement = function () {
     return { type: "element", tagName: isFragment ? null : rawTagName, attributes, children };
 };
 
-/** @returns {string} */
+/**
+ * @returns {string}
+ */
 Parser.prototype.parseSpreadAttribute = function () {
     this.expect("{");
     this.expect("...");
     return this.consumeBraceBody();
 };
 
-/** @returns {[string, import("./ast-types.js").AttributeValue]} */
+/**
+ * @returns {[string, import("./ast-types.js").AttributeValue]}
+ */
 Parser.prototype.parseAttribute = function () {
     const name = this.parseName();
     this.consumeWhiteSpace();
@@ -699,7 +743,9 @@ Parser.prototype.parseAttribute = function () {
     return [name, this.parseAttributeValue()];
 };
 
-/** @returns {import("./ast-types.js").AttributeValue} */
+/**
+ * @returns {import("./ast-types.js").AttributeValue}
+ */
 Parser.prototype.parseAttributeValue = function () {
     const firstChar = this.nextChar();
 

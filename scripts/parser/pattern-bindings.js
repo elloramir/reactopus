@@ -74,7 +74,9 @@ export function extractPatternBindings(patternSrc) {
     const trimmed = patternSrc.trim();
     const inner = trimmed.slice(1, -1);
     const segments = splitTopLevel(inner, ",");
-    /** @type {string[]} */
+    /**
+     * @type {string[]}
+     */
     const names = [];
 
     for (let seg of segments) {

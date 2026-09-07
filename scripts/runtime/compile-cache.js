@@ -7,7 +7,9 @@ import { fnv1aHash } from "../utils/hash.js";
 const CACHE_VERSION = "1";
 const KEY_PREFIX = `reactopus:compile:v${CACHE_VERSION}:`;
 
-/** @returns {Storage|null} */
+/**
+ * @returns {Storage|null}
+ */
 function getStorage() {
     try {
         return window.localStorage;

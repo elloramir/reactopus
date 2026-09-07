@@ -7,10 +7,14 @@ import {
     getCompiledFile,
 } from "./module-registry.js";
 
-/** @type {string|null} */
+/**
+ * @type {string|null}
+ */
 let ownDocumentUrl = null;
 
-/** @param {{ownDocumentUrl: string}} config */
+/**
+ * @param {{ownDocumentUrl: string}} config
+ */
 export function configureSandbox(config) {
     ownDocumentUrl = config.ownDocumentUrl;
 }
@@ -39,7 +43,9 @@ function customRequire(path, baseUrl) {
  * @returns {Object}
  */
 export function executeCompiled(compiled, url) {
-    /** @type {import("./types.js").ModuleRecord} */
+    /**
+     * @type {import("./types.js").ModuleRecord}
+     */
     const module = { exports: {} };
 
     // Register before running the factory: a circular require() then sees

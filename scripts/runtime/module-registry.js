@@ -16,9 +16,13 @@ const BUILTIN_MODULES = {
 // Builtins start pre-registered. Both maps live here, not split across
 // loader.js/sandbox.js, so there's one place that answers "what do we know
 // about this URL" instead of three call sites re-deriving it from two maps.
-/** @type {Object<string, import("./types.js").ModuleRecord>} */
+/**
+ * @type {Object<string, import("./types.js").ModuleRecord>}
+ */
 let modules = { ...BUILTIN_MODULES };
-/** @type {Map<string, import("./types.js").CompiledModule>} */
+/**
+ * @type {Map<string, import("./types.js").CompiledModule>}
+ */
 const compiledFiles = new Map();
 
 // Only meant for reset between page boots/test runs (see bootloader.js's

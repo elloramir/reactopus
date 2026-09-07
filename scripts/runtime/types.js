@@ -12,6 +12,8 @@
  * @typedef {{exports: Object, error?: Error}} ModuleRecord
  */
 
-/** @typedef {{concurrency: number, cache: boolean, debug: boolean}} LoaderConfig */
+/**
+ * @typedef {{concurrency: number, cache: boolean, debug: boolean}} LoaderConfig
+ */
 
 export {};
